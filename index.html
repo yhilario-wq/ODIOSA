@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOSEQUEHICE</title>
+    <!-- Importamos fuentes necesarias -->
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Allerta+Stencil&family=Montserrat:wght@400;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #020004;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* --- PANTALLA INTERACTIVA DE BIENVENIDA (RESPONSIVE) --- */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #020004;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease, visibility 1s;
+            padding: 20px;
+        }
+
+        #intro-overlay h1 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 14px;
+            padding: 15px 35px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .btn-yes {
+            background-color: #e61717;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(230, 23, 23, 0.4);
+        }
+
+        .btn-yes:hover {
+            transform: scale(1.05);
+            background-color: #ff1f1f;
+            box-shadow: 0 0 25px rgba(230, 23, 23, 0.8);
+        }
+
+        .btn-no {
+            background-color: #110d1a;
+            color: #555555;
+            border: 1px solid #333333;
+        }
+
+        .btn-no:hover {
+            background-color: #000000;
+            color: #ff3333;
+            border-color: #ff3333;
+        }
+
+        #intro-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+
+        /* --- CONTENIDO PRINCIPAL DEL CORAZÓN (RESPONSIVE) --- */
+        #universe-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Cambiado a medidas relativas (vw) para adaptarse a cualquier pantalla */
+        #heart-container {
+            position: relative;
+            width: 90vw;
+            height: 90vw;
+            max-width: 600px;
+            max-height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            transform: translateY(-30px); 
+        }
+
+        /* "I Love You" Moves style */
+        .love-text {
+            position: absolute;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #e61717;
+            font-size: 9px; /* Escritorio */
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0);
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 5px rgba(230, 23, 23, 0.6), 0 0 10px rgba(150, 0, 0, 0.4);
+        }
+
+        /* "ODIOSA" One Slice style */
+        #odiosa-name {
+            position: absolute;
+            font-family: 'Allerta Stencil', sans-serif;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: #ffffff;
+            font-size: 75px; /* Escritorio */
+            letter-spacing: 2px;
+            opacity: 0;
+            transform: scale(0.4);
+            transition: all 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+            text-shadow: none;
+        }
+
+        #odiosa-name.reveal {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* --- MEDIA QUERIES PARA CELULARES --- */
+        @media (max-width: 768px) {
+            #intro-overlay h1 {
+                font-size: 20px;
+            }
+            
+            #heart-container {
+                width: 95vw;
+                height: 95vw;
+                transform: translateY(-40px); /* Un poco más arriba en celulares */
+            }
+
+            /* Hacemos la fuente micro para que las capas no se encimen en pantallas chicas */
+            .love-text {
+                font-size: 6px; 
+                letter-spacing: -0.3px;
+            }
+
+            /* Reducimos a ODIOSA para que encaje perfectamente dentro del marco concéntrico */
+            #odiosa-name {
+                font-size: 48px;
+                letter-spacing: 1px;
+            }
+        }
+
+        /* Animación de latido */
+        .pulse-animation {
+            animation: heartBeat 2.5s infinite ease-in-out;
+        }
+
+        @keyframes heartBeat {
+            0% { transform: translateY(-30px) scale(1); }
+            15% { transform: translateY(-30px) scale(1.03); }
+            30% { transform: translateY(-30px) scale(1); }
+            45% { transform: translateY(-30px) scale(1.01); }
+            70% { transform: translateY(-30px) scale(1); }
+        }
+
+        /* Ajuste de animación para mobile */
+        @media (max-width: 768px) {
+            @keyframes heartBeat {
+                0% { transform: translateY(-40px) scale(1); }
+                15% { transform: translateY(-40px) scale(1.03); }
+                30% { transform: translateY(-40px) scale(1); }
+                45% { transform: translateY(-40px) scale(1.01); }
+                70% { transform: translateY(-40px) scale(1); }
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Pantalla Interactiva de Filtro -->
+    <div id="intro-overlay">
+        <h1>¿Si eres Daniela dale click, si no NO? xd</h1>
+        <div class="btn-container">
+            <button class="btn btn-yes" onclick="startMagic()">SÍ, SOY DANIELA</button>
+            <button class="btn btn-no" onclick="alert('Entonces no tienes nada que ver aquí... ¡Sáquese! 😂')">NO</button>
+        </div>
+    </div>
+
+    <!-- Fondo de estrellas dinámico -->
+    <canvas id="universe-canvas"></canvas>
+
+    <!-- Estructura del Corazón concéntrico -->
+    <div id="heart-container">
+        <div id="odiosa-name">ODIOSA</div>
+    </div>
+
+    <script>
+        // --- 1. FONDO DE UNIVERSO ---
+        const uvCanvas = document.getElementById('universe-canvas');
+        const uvCtx = uvCanvas.getContext('2d');
+
+        function resizeCanvas() {
+            uvCanvas.width = window.innerWidth;
+            uvCanvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const stars = [];
+        for(let i = 0; i < 70; i++) { // Optimizado un poco para rendimiento móvil
+            stars.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                size: Math.random() * 1.2,
+                alpha: Math.random(),
+                speed: 0.004 + Math.random() * 0.01
+            });
+        }
+
+        function drawUniverse() {
+            uvCtx.clearRect(0, 0, uvCanvas.width, uvCanvas.height);
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if(star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
+                uvCtx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                uvCtx.beginPath();
+                uvCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                uvCtx.fill();
+            });
+            requestAnimationFrame(drawUniverse);
+        }
+        drawUniverse();
+
+
+        // --- 2. GENERACIÓN DE CORAZONES RESPONSIVE ---
+        const container = document.getElementById('heart-container');
+        const odiosa = document.getElementById('odiosa-name');
+
+        function getHeartCoordinate(t, scaleFactor) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+            return {
+                x: x * scaleFactor,
+                y: -y * scaleFactor
+            };
+        }
+
+        function startMagic() {
+            document.getElementById('intro-overlay').classList.add('fade-out');
+
+            // Ajustamos dinámicamente las escalas matemáticas según el tamaño del dispositivo
+            const isMobile = window.innerWidth <= 768;
+            
+            // Si es móvil, usamos un factor multiplicador más pequeño para el render dinámico
+            const baseMultiplier = isMobile ? (window.innerWidth * 0.022) : 12.5;
+
+            const heartLayers = [1.2, 1.0, 0.8, 0.6, 0.4];
+            const textsPerLayer = [65, 52, 40, 26, 14]; 
+
+            heartLayers.forEach((scale, layerIndex) => {
+                const totalTexts = textsPerLayer[layerIndex];
+                const currentScale = scale * baseMultiplier;
+
+                for (let i = 0; i < totalTexts; i++) {
+                    const textNode = document.createElement('div');
+                    textNode.className = 'love-text';
+                    textNode.innerText = 'I Love You';
+
+                    const t = (i / totalTexts) * Math.PI * 2;
+                    const pos = getHeartCoordinate(t, currentScale);
+
+                    textNode.style.left = `calc(50% + ${pos.x}px)`;
+                    textNode.style.top = `calc(50% + ${pos.y}px)`;
+                    container.appendChild(textNode);
+
+                    const randomDelay = Math.random() * 3.5;
+
+                    setTimeout(() => {
+                        textNode.style.transition = 'all 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                        textNode.style.opacity = 0.35 + (Math.random() * 0.55);
+                        textNode.style.transform = 'translate(-50%, -50%) scale(1)';
+                    }, randomDelay * 1000);
+                }
+            });
+
+            setTimeout(() => {
+                odiosa.classList.add('reveal');
+                container.classList.add('pulse-animation');
+            }, 4500);
+        }
+    </script>
+</body>
+</html>
